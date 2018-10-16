@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
+
 import scrapy
-import pprint
 
 class FincaRaizSpider(scrapy.Spider):
     name = "finca_raiz"
@@ -15,16 +16,27 @@ class FincaRaizSpider(scrapy.Spider):
 
     def parse(self, response):
         for item in response.css('ul.advert'):
+            # clean input data
+            description =   item.css('li.title-grid .span-title>a h2.h2-grid::text').extract_first() or \
+                                item.css('li.information .title-grid a::attr(title)').extract_first()
+
+            surface =   item.css('li.surface::text').extract_first() or \
+                        item.css('li.information .title-grid .description::text').extract_first()
+
+            price =     item.css('li.price div:first-child meta::attr(content)').extract_first() or \
+                        item.css('li.information .title-grid .descriptionPrice::text').extract_first()
+
+            full_location = item.css('li.title-grid .span-title>a>div:last-child::text').extract_first()
+            neighborhood, city = full_location.split('-') if full_location else ["", ""]
+
             yield {
                 'link':  response.urljoin(item.css('li.title-grid .span-title>a::attr(href)').extract_first()),
-                'description':  item.css('li.title-grid .span-title>a h2.h2-grid::text').extract_first() or
-                                item.css('li.information .title-grid a::attr(title)').extract_first(),
-                'surface':  item.css('li.surface::text').extract_first() or
-                            item.css('li.information .title-grid .description::text').extract_first(),
-                'price':    item.css('li.price div:first-child meta::attr(content)').extract_first() or
-                            item.css('li.information .title-grid .descriptionPrice::text').extract_first(),
+                'description': description,
+                'surface':  surface,
+                'price':    price,
                 'rooms': item.css('li.surface>div::text').extract_first(),
-                'city': item.css('li.title-grid .span-title>a>div:last-child::text').extract_first(),
+                'neighborhood': neighborhood,
+                'city': city,
                 'status': item.css('li.media .usedMark::text').extract_first() or 'Nuevo',
             }
 
