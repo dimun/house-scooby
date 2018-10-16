@@ -5,12 +5,12 @@ Python based  web scrapper
 * Scrapy
 
 ## How to ##
- `
+ ```
     python -m virtualenv env
     pip install -r requirements.txt
     cd scrapper/
     scrapy crawl finca_raiz
- `
+ ```
 
 ## Resources ##
 * (User agent setting config)[https://www.simplified.guide/scrapy/change-user-agent]
