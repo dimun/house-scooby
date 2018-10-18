@@ -7,6 +7,7 @@ Python based  web scrapper
 ## How to ##
  ```
     python -m virtualenv env
+    source env/bin/activate
     pip install -r requirements.txt
     cd scrapper/
     scrapy crawl finca_raiz
