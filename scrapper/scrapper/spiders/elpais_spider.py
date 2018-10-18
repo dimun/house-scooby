@@ -4,7 +4,7 @@ import scrapy
 
 class ElPaisSpider(scrapy.Spider):
     name = "el_pais"
-    allowd_domains = ["fincaraiz.elpais.com.co"]
+    allowed_domains = ["fincaraiz.elpais.com.co"]
     start_urls = [
         "https://fincaraiz.elpais.com.co/avisos/venta/casas/cali"
     ]

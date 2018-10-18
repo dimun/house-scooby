@@ -4,7 +4,7 @@ import scrapy
 
 class FincaRaizSpider(scrapy.Spider):
     name = "finca_raiz"
-    allowd_domains = ["fincaraiz.com.co"]
+    allowed_domains = ["fincaraiz.com.co"]
     start_urls = [
         'https://www.fincaraiz.com.co/lote-casa/venta/cali-jamundi/?ad=30|1||||1||2,9|||82|8200006,8200003|||190000000|||||||||||||1|||1||griddate%20desc||||-1||',
         'https://www.fincaraiz.com.co/lote-casa/venta/cali-jamundi/?ad=30|2||||1||2,9|||82|8200006,8200003|||190000000|||||||||||||1|||1||griddate%20desc||||-1||',
