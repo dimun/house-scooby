@@ -2,7 +2,7 @@
 
 import scrapy
 
-class FincaRaizSpider(scrapy.Spider):
+class ElPaisSpider(scrapy.Spider):
     name = "el_pais"
     allowd_domains = ["fincaraiz.elpais.com.co"]
     start_urls = [
