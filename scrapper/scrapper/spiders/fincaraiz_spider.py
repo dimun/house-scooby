@@ -5,13 +5,15 @@ import scrapy
 class FincaRaizSpider(scrapy.Spider):
     name = "finca_raiz"
     allowed_domains = ["fincaraiz.com.co"]
+    types = ['apartamento', 'casa-lote', 'casa-campestre', 'casa', 'lote', 'finca']
+    cities = ['cali', 'jamundi', 'palmira']
+    min_price = '60000000'
+    max_price = '190000000'
     start_urls = [
-        'https://www.fincaraiz.com.co/lote-casa/venta/cali-jamundi/?ad=30|1||||1||2,9|||82|8200006,8200003|||190000000|||||||||||||1|||1||griddate%20desc||||-1||',
-        'https://www.fincaraiz.com.co/lote-casa/venta/cali-jamundi/?ad=30|2||||1||2,9|||82|8200006,8200003|||190000000|||||||||||||1|||1||griddate%20desc||||-1||',
-        'https://www.fincaraiz.com.co/lote-casa/venta/cali-jamundi/?ad=30|3||||1||2,9|||82|8200006,8200003|||190000000|||||||||||||1|||1||griddate%20desc||||-1||',
-        'https://www.fincaraiz.com.co/lote-casa/venta/cali-jamundi/?ad=30|4||||1||2,9|||82|8200006,8200003|||190000000|||||||||||||1|||1||griddate%20desc||||-1||',
-        'https://www.fincaraiz.com.co/lote-casa/venta/cali-jamundi/?ad=30|5||||1||2,9|||82|8200006,8200003|||190000000|||||||||||||1|||1||griddate%20desc||||-1||',
-        'https://www.fincaraiz.com.co/lote-casa/venta/cali-jamundi/?ad=30|6||||1||2,9|||82|8200006,8200003|||190000000|||||||||||||1|||1||griddate%20desc||||-1||'
+        'https://www.fincaraiz.com.co/{0}/venta/{1}/?ad=30|{2}||||1||8,21,23,7|||82|8200006|8200104|{3}|{4}||||||||||||||||1||griddate%20desc||||-1||'.format(t,c,i, min_price, max_price)  \
+        for t in types \
+        for c in cities \
+        for i in range(1,10)
     ]
 
     def parse(self, response):
