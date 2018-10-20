@@ -17,6 +17,11 @@ def extract_digits(input):
 
 
 class PropertyItem(Item):
+    internal_id = Field(
+        input_processor=MapCompose(strip_spaces, remove_tags),
+        output_processor=TakeFirst()
+    )
+    link = Field()
     city = Field(
         input_processor=MapCompose(strip_spaces),
         output_processor=Join()
@@ -48,6 +53,7 @@ class PropertyItem(Item):
         output_proccesor=Identity()
     )
 
-    features = Field(
-        
-    )
+    features = Field()
+    other_features = Field()
+    contact_info = Field()
+    

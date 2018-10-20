@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from scrapy import Spider, Request
-from pprint import pprint
+from scrapper.items import PropertyItem
 
 
 class ElPaisSpider(Spider):
@@ -17,23 +17,23 @@ class ElPaisSpider(Spider):
 
     def parse(self, response):
         for item in response.css('article.flexArticle'):
+            property_item = PropertyItem()
             full_description = item.css('div.info div.description::text').extract_first()
-            features = full_description.split(', ') if full_description else []
-            city = features[0] if 0 in features else '' 
-            rooms = features[1] if 1 in features else 0
-            bathrooms = features[2] if 2 in features else 0
-            surface = features[3] if 3 in features else 0
+            city, rooms, bathrooms, surface = full_description.split(', ') if full_description else ['', 0, 0, 0]
             property_url = response.urljoin(item.css('div.info>a.link-info::attr(href)').extract_first())
-            property_item = {
-                'link':  property_url,
-                'surface': surface,
-                'price': item.css('div.info div.price::text').extract_first(),
-                'rooms': rooms,
-                'bathrooms': bathrooms,
-                'city': city
-            }
+            
+            # fill properties
+            property_item['link'] = property_url
+            property_item['surface'] = surface
+            property_item['price'] = item.css('div.info div.price::text').extract_first()
+            property_item['bedrooms'] = rooms
+            property_item['bathrooms'] = bathrooms
+            property_item['city'] = city
+
             # call single element page
-            yield Request(url=property_url, callback=self.parse_single, meta=dict(item=property_item))
+            request = Request(property_url, self.parse_single)
+            request.meta['item'] = property_item
+            yield request
 
         next_page = response.css('nav.pagination-box>ul.pagination>li.next>a::attr(href)').extract_first()
         if next_page is not None:
@@ -42,12 +42,19 @@ class ElPaisSpider(Spider):
 
     def parse_single(self, response):
         item = response.meta['item']
+
+        # internal unique identifier
+        item['internal_id'] = response.css('.id-web p.id').extract_first().split(':')[1]
+
+        # general desc
         item['description'] = response.css('div.descripcion p::text').extract_first()
         item['contact_info'] = response.css('div.info p::text').extract()
 
         # extract feature list
-        feature_names = list(map(lambda x: x.strip(), response.css('div.caract ul li strong::text').extract()))
-        feature_values = list(map(lambda x: x.strip(), response.css('div.caract ul li:not(strong)::text').extract()))
+        feature_names = list(map(lambda x: x.strip(), response.css('div.caract ul li strong::text').extract())) + \
+            list(map(lambda x: x.strip(), response.css('div.caract ul:nth-child(2) li strong::text').extract()))
+        feature_values = list(map(lambda x: x.strip(), response.css('div.caract ul li:not(strong)::text').extract())) + \
+            list(map(lambda x: x.strip(), response.css('div.caract ul:nth-child(2) li:not(strong)::text').extract()))
 
         # remove empty values before create dict
         feature_values = [v for v in feature_values if v != '']
@@ -55,11 +62,16 @@ class ElPaisSpider(Spider):
 
         # process other features
         item['other_features'] = list(
-            map(
-                lambda x: x.strip(),
-                response.css('div.caract ul:nth-child(2) li::text').extract() + \
-                response.css('div.caract ul:nth-child(3) li::text').extract()
+            filter(
+                (lambda x: x != ''),
+                list(
+                    map(
+                        lambda x: x.strip(),
+                        response.css('div.caract ul:nth-child(3) li::text').extract()
+                    )
+                )
             )
+            
         )
 
         yield item
