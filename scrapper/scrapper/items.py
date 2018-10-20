@@ -6,14 +6,22 @@ from scrapy.loader.processors import Compose, MapCompose, Join, TakeFirst, Ident
 import re
 from w3lib.html import remove_tags
 
+
 # cleaning and extracting utilities
 def strip_spaces(input):
     return input.rstrip('\r\n ')
 
+
 def extract_digits(input):
-    return  re.findall(r'\b\d+\b',input)
+    return re.findall(r'\b\d+\b', input)
+
 
 class PropertyItem(Item):
+    internal_id = Field(
+        input_processor=MapCompose(strip_spaces, remove_tags),
+        output_processor=TakeFirst()
+    )
+    link = Field()
     city = Field(
         input_processor=MapCompose(strip_spaces),
         output_processor=Join()
@@ -45,6 +53,7 @@ class PropertyItem(Item):
         output_proccesor=Identity()
     )
 
-    features = Field(
-        
-    )
+    features = Field()
+    other_features = Field()
+    contact_info = Field()
+    
