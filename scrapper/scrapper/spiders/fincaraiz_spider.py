@@ -1,32 +1,34 @@
 # -*- coding: utf-8 -*-
 
-import scrapy
+from scrapy import Spider, Request
 
-class FincaRaizSpider(scrapy.Spider):
+
+class FincaRaizSpider(Spider):
     name = "finca_raiz"
     allowd_domains = ["fincaraiz.com.co"]
     types = ['apartamento', 'casa-lote', 'casa-campestre', 'casa', 'lote', 'finca']
     cities = ['cali', 'jamundi', 'palmira']
     min_price = '60000000'
     max_price = '190000000'
+    base_url = 'https://www.fincaraiz.com.co/{0}/venta/{1}/?ad=30|{2}||||1||8,21,23,7|||82|8200006|8200104|{3}|{4}||||||||||||||||1||griddate%20desc||||-1||'
     start_urls = [
-        'https://www.fincaraiz.com.co/{0}/venta/{1}/?ad=30|{2}||||1||8,21,23,7|||82|8200006|8200104|{3}|{4}||||||||||||||||1||griddate%20desc||||-1||'.format(t,c,i, min_price, max_price)  \
-        for t in types \
-        for c in cities \
-        for i in range(1,10)
+        base_url.format(t, c, i, min_price, max_price) 
+        for t in types
+        for c in cities
+        for i in range(1, 10)
     ]
 
     def parse(self, response):
         for item in response.css('ul.advert'):
             # clean input data
-            description =   item.css('li.title-grid .span-title>a h2.h2-grid::text').extract_first() or \
-                                item.css('li.information .title-grid a::attr(title)').extract_first()
+            description = item.css('li.title-grid .span-title>a h2.h2-grid::text').extract_first() or \
+                item.css('li.information .title-grid a::attr(title)').extract_first()
 
-            surface =   item.css('li.surface::text').extract_first() or \
-                        item.css('li.information .title-grid .description::text').extract_first()
+            surface = item.css('li.surface::text').extract_first() or \
+                item.css('li.information .title-grid .description::text').extract_first()
 
-            price =     item.css('li.price div:first-child meta::attr(content)').extract_first() or \
-                        item.css('li.information .title-grid .descriptionPrice::text').extract_first()
+            price = item.css('li.price div:first-child meta::attr(content)').extract_first() or \
+                item.css('li.information .title-grid .descriptionPrice::text').extract_first()
 
             full_location = item.css('li.title-grid .span-title>a>div:last-child::text').extract_first()
             neighborhood, city = full_location.split('-') if full_location else ["", ""]
